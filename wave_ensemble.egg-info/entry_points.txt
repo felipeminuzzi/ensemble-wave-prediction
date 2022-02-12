@@ -1,0 +1,4 @@
+
+    [console_scripts]
+    wave_ensemble=_cmd:cli
+    
