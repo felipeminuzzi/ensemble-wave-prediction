@@ -39,7 +39,6 @@ def train_models(models, features, target, dates, forecast, npredict, lead, num_
             md          = SklearnClass(regressor, features, target_df, dates, forecast, npredict, lead, num_features, val_size, n_calls, 
                                     space, n_initial_points, parameters, reg, flag)
         result, metric  = md.create_future()
-        
         if error_prediction:
             negatives = target.loc[(target.index >= result['Data'].min()) & (target.index <= result['Data'].max())].copy()
             negatives.reset_index(inplace=True)
