@@ -11,7 +11,7 @@ import pandas as pd
 seed(1)
 
 class Config():
-    def __init__(self, n_calls=4, n_initial_points=3, val_size = 0.2, epochs = 2000, lag_size=7):
+    def __init__(self, n_calls=4, n_initial_points=3, val_size = 0.2, epochs = 2, lag_size=7):
         self.n_calls          = n_calls
         self.n_initial_points = n_initial_points
         self.val_size         = val_size
