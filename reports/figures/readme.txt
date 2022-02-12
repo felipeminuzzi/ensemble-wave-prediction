@@ -31,3 +31,7 @@ previsao de 120 steps, arquitetura classica, ativacao: tanh, boia de santos, pre
 
 santos_v6:
 previsao de 40 steps, arquitetura classica, ativacao: tanh, boia de santos, previsao de erro, apenas membros do Hs como features, usando ensembles do NOAA, previsao do futuro, e nao lead a lead - deterministic
+
+santos_v7:
+previsao de 40 steps, arquitetura classica, ativacao: tanh, boia de santos, previsao de erro, apenas membros do Hs como features, usando ensembles do NOAA - deterministic
+

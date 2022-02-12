@@ -238,7 +238,7 @@ def correct_output(files,dest):
 
 def create_graph(dest):
     error_prediction = True
-    future      = True
+    future      = False
     output      = glob.glob(dest+'*.csv')
     if error_prediction:
         correct_output(output,dest)
