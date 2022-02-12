@@ -3,3 +3,17 @@
 
 # external requirements
 click
+pandas
+numpy==1.21
+ipdb
+matplotlib
+joblib
+tqdm
+tensorflow
+scikit-learn
+scikit-optimize
+glob2
+pmdarima
+scipy
+pyod
+xgboost
