@@ -47,7 +47,7 @@ def train_models(models, features, target, dates, forecast, npredict, lead, num_
         else:
             mape_buoy = feat.mape(result['label'], result['predict'])
             print(f'MAPE between predicted x buoy for {reg}: {mape_buoy}')
-        #import ipdb; ipdb.set_trace()
+        
         result.to_csv(f'{dest}predictions_{lead}_{reg}.csv')
         #save_metric(dest,lead,reg,metric)
 
@@ -150,10 +150,16 @@ def dispatch(ori, dest):
     num_features     = features.shape[1]
     
     npredict         = config.predict
-    leads            = config.leads
+    
+    if future_predict:
+        leads        = [0]
+        n_jobs       = 1
+    else:
+        leads        = config.leads
+        n_jobs       = config.n_jobs
+    
     dates            = features.index[-npredict:]
     models           = config.machine
-    n_jobs           = config.n_jobs
     
     start            = time.time()
     Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_models)(models,features, target, dates, 

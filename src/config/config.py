@@ -22,15 +22,15 @@ class Config():
         self.forecast         = 12
         self.predict          = 120
         self.leads            = [6,12,18,24]
-        self.machine          = ['lstm']#['lstm','rnn','cnn-lstm','cnn','dense']#,'xgb','svr']   
+        self.machine          = ['lstm','rnn','cnn-lstm','cnn','dense']#,'xgb','svr']   
         self.n_jobs           = 1
         ##################################
+        self.activation       = 'tanh' 
+        self.var_to_error     = 'mean'
         self.use_error        = True
         self.use_era          = False
         self.use_spaced       = False     
-        self.activation       = 'tanh' 
-        self.future           = True
-        self.var_to_error     = 'mean'
+        self.future           = False
         
         self.models = {
                     'svr': {
