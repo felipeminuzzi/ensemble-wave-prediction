@@ -1,3 +1,4 @@
+from turtle import color
 import numpy as np 
 import pandas as pd 
 import matplotlib.pyplot as plt 
@@ -18,7 +19,7 @@ def mean_erro(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred)))
 
-def create_output_graph_fut(files):
+def create_output_graph_fut(files,plot_error):
     dfs_6       = []
 
     for f in files:
@@ -56,9 +57,23 @@ def create_output_graph_fut(files):
     create_plots(lead,reais[0],predictions[0],xx[0],yy[0], False, None)
     plt.figure(2).text(0.5, 0.04, 'Time', ha='center', va='center')
     plt.figure(2).text(0.06, 0.5, 'Wave height - Hs (m)', ha='center', va='center', rotation='vertical')
+
+    if plot_error:
+        ls      = predictions[0].columns.to_list()
+        lead    = int(ls[0].split('_')[-1]) 
+
+        plt.figure(3)
+        create_plots_error(lead,reais[0],predictions[0],xx[0],yy[0], True)        
+        plt.figure(3).text(0.5, 0.04, 'Time', ha='center', va='center')
+        plt.figure(3).text(0.06, 0.5, 'Relative error $\Delta_{\text{rel}}$', ha='center', va='center', rotation='vertical')  
+
+        plt.figure(4)
+        create_plots_error(lead,reais[0],predictions[0],xx[0],yy[0], False)
+        plt.figure(4).text(0.5, 0.04, 'Time', ha='center', va='center')
+        plt.figure(4).text(0.06, 0.5, 'Relative error $\Delta_{\text{rel}}$', ha='center', va='center', rotation='vertical')
     plt.show()
 
-def create_output_graph(files,ls_antigos,dict_metrics, average):
+def create_output_graph(files,ls_antigos,dict_metrics, average, plot_error):
     dfs_6       = []
     dfs_12      = []
     dfs_18      = []
@@ -146,6 +161,27 @@ def create_output_graph(files,ls_antigos,dict_metrics, average):
             create_plots_avg(lead,reais[i],predictions[i],xx[i],yy[i], df_metric, antigo)
             plt.figure(6).text(0.5, 0.04, 'Time', ha='center', va='center')
             plt.figure(6).text(0.06, 0.5, 'Wave height - Hs (m)', ha='center', va='center', rotation='vertical')
+
+    if plot_error:
+        plt.figure(6)
+        for i in range(4):
+            ls      = predictions[i].columns.to_list()
+            lead    = int(ls[0].split('_')[-1]) 
+        
+            plt.subplot(2,2,i+1)
+            create_plots_error(lead,reais[i],predictions[i],xx[i],yy[i], True)        
+        plt.figure(6).text(0.5, 0.04, 'Time', ha='center', va='center')
+        plt.figure(6).text(0.06, 0.5, 'Relative error $\Delta_{\text{rel}}$', ha='center', va='center', rotation='vertical')
+
+        plt.figure(7)
+        for i in range(4):
+            ls      = predictions[i].columns.to_list()
+            lead    = int(ls[0].split('_')[-1]) 
+            
+            plt.subplot(2,2,i+1)
+            create_plots_error(lead,reais[i],predictions[i],xx[i],yy[i], False)
+        plt.figure(7).text(0.5, 0.04, 'Time', ha='center', va='center')
+        plt.figure(7).text(0.06, 0.5, 'Relative error $\Delta_{\text{rel}}$', ha='center', va='center', rotation='vertical')
     plt.show()
 
 def create_weighted_average(df, dct_metric):
@@ -195,6 +231,29 @@ def create_plots_avg(lead, df_true, df_predict,x,y, df_metric, antigo):
     plt.legend()
     plt.xticks(x,y, rotation=30)
 
+def create_plots_error(lead, df_true, df_predict,x,y,flag):
+    ls      = df_predict.columns.to_list()
+    plt.title(f'Deep learning prediction of Hs - lead: {lead}')
+    tick    = ['-','--','.','-.','-*']
+    if flag:
+        j = 0
+        for col in ls[:-1]:
+            mapes = mape(df_true['Hs_real'], df_predict[col]).round(2)
+            errors = erro(df_true['Hs_real'], df_predict[col])
+            m_erro = mean_erro(df_true['Hs_real'], df_predict[col]).round(2)
+            plt.plot(df_predict.index, errors ,tick[j],label=f'{col} - {mapes} - {m_erro}',color='black')
+            j += 1
+    else:
+        j = 0
+        for col in ls[-1:]:
+            mapes = mape(df_true['Hs_real'], df_predict[col]).round(2)
+            errors = erro(df_true['Hs_real'], df_predict[col])
+            m_erro = mean_erro(df_true['Hs_real'], df_predict[col]).round(2)
+            plt.plot(df_predict.index, errors ,tick[j],label=f'Predicted {col} - {mapes} - {m_erro}',color='black')
+            j += 1
+    plt.legend()
+    plt.xticks(x,y, rotation=30)
+
 def get_metrics(data):
     dict_metrics     = {}
     for f in data:
@@ -237,9 +296,10 @@ def correct_output(files,dest):
         df.to_csv(f'{dest}predictions_{lead}_{model}.csv')
 
 def create_graph(dest):
-    error_prediction = True
+    error_prediction = False
     future      = False
     output      = glob.glob(dest+'*.csv')
+    plot_error  = True
     if error_prediction:
         correct_output(output,dest)
     res_antigo  = glob.glob('/Users/felipeminuzzi/Documents/OCEANO/Simulations/Machine_Learning/results/predict_with_historic_buoy_without_outliers/buoy_rio_grande/*.csv')
@@ -247,6 +307,6 @@ def create_graph(dest):
     #metric      = glob.glob(dest+'metric/*')
     #dict_metrics= get_metrics(metric)
     if future:
-        create_output_graph_fut(output)
+        create_output_graph_fut(output,plot_error)
     else:
-        create_output_graph(output,ls_antigos,None, False)
+        create_output_graph(output,ls_antigos,None, False,plot_error)
