@@ -1,4 +1,5 @@
 
+from errno import EEXIST
 import glob
 import pandas as pd
 import numpy as np
@@ -140,11 +141,15 @@ def dispatch(ori, dest):
     use_era          = config.use_era
     spaced_predict   = config.use_spaced 
     future_predict   = config.future
+    multi_target     = config.multi_target
 
     dest             = feat.format_path(dest)
     path             = glob.glob(ori+'*')
 
-    features, target, to_result, to_deterministic = setup(error_prediction,path,use_era)
+    if multi_target:
+        features, target, init_pred = data_format.multi_target_setup(ori)
+    else:
+        features, target, to_result, to_deterministic = setup(error_prediction,path,use_era)
     
     forecast         = config.forecast
     num_features     = features.shape[1]

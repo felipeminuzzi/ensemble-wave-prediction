@@ -31,6 +31,7 @@ class Config():
         self.use_era          = False
         self.use_spaced       = False     
         self.future           = False
+        self.multi_target     = True
         
         self.models = {
                     'svr': {

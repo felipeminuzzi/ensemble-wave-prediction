@@ -1,7 +1,10 @@
+from importlib.resources import path
 import numpy as np
 import pandas as pd
 import xarray as xr
+import glob
 import warnings
+import pickle
 from pyod.models.knn import KNN
 from scipy import stats
 from sklearn import preprocessing
@@ -88,6 +91,20 @@ def correct_data(df1,df2):
     df_2 = df2.loc[(df2.index <= final) & (df2.index >= inicio)]
 
     return df_1, df_2
+
+def multi_target_setup(path):
+    files = glob.glob(path+'*')
+    for f in files:
+        if f.split('/')[-1][-3:] == 'pkl':
+            with open(f, 'rb') as handle:
+                first_predict_date  = pickle.load(handle)
+        elif f.split('/')[-1][:-4].split('_')[-1] == 'features':
+            df_feat = pd.read_csv(f, encoding='utf-8', sep=';', decimal=',').drop('Unnamed: 0', axis=1)
+        else:
+            df_target = pd.read_csv(f, encoding='utf-8', sep=';', decimal=',').drop('Unnamed: 0', axis=1)
+
+    pred_dates = pd.date_range(start=first_predict_date, periods=df_feat.shape[1], freq='3H')
+    return df_target, df_feat, pred_dates
 
 def create_df(pth):
     config    = Config()
