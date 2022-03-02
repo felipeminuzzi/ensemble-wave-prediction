@@ -52,6 +52,37 @@ def train_models(models, features, target, dates, forecast, npredict, lead, num_
         result.to_csv(f'{dest}predictions_{lead}_{reg}.csv')
         #save_metric(dest,lead,reg,metric)
 
+def train_future_models(mod, features, target, dates, forecast, npredict, dest, num_features, conf):
+    config          = conf
+    epochs          = config.epochs
+    cols            = conf.target
+
+    md              = TFlow(mod, features, target, dates, forecast, npredict, 0, num_features, epochs, 0, False, None)
+    result          = md.create_multi_output()
+    result.set_index('Data', inplace=True)
+    
+    pth             = './data/raw/noaa/processed_20211104_lead_00.csv'
+    df_noaa         = pd.read_csv(pth, encoding='utf-8', sep=';', decimal=',').drop('Unnamed: 0', axis=1)
+    df_noaa         = df_noaa[['time','deterministic']].fillna(method='bfill')
+    df_noaa['time'] = pd.to_datetime(df_noaa['time'])
+    df_noaa         = df_noaa.loc[(df_noaa['time'] >= result.index.min()) & (df_noaa['time'] <= result.index.max())]
+    df_noaa.set_index('time',inplace=True)
+
+    boia            = './data/raw/buoy/buoy_historic_santos.csv'
+    tgt             = pd.read_csv(boia)
+    tgt['Datetime'] = pd.to_datetime(tgt['Datetime'])   
+    tgt.set_index('Datetime',inplace=True)
+    tgt         = tgt.loc[(tgt.index >=  result.index.min()) & (tgt.index <= result.index.max())]
+    tgt         = tgt[cols]
+    breakpoint()
+
+    result['result']= result['predict'] + df_noaa['deterministic']
+    result['real']  = tgt[cols] 
+    result['noaa']  = df_noaa['deterministic']
+
+    result.to_csv(f'{dest}predictions_{0}_{reg}.csv')
+
+
 def correct_result(df, df_feat, reg, boia, conf, path):
     cols        = conf.target
     use_era     = conf.use_era
@@ -134,7 +165,6 @@ def setup(error_pred, pth, era):
         features,target  = data_format.create_df(path_target)
     return features, target, to_result, to_deterministic
 
-
 def dispatch(ori, dest):
     config           = Config()
     error_prediction = config.use_error
@@ -147,14 +177,16 @@ def dispatch(ori, dest):
     path             = glob.glob(ori+'*')
 
     if multi_target:
-        features, target, init_pred = data_format.multi_target_setup(ori)
+        target, features, dates     = data_format.multi_target_setup(ori)
+        npredict                    = len(dates)
+        to_result, to_deterministic = None, None
     else:
         features, target, to_result, to_deterministic = setup(error_prediction,path,use_era)
+        dates            = features.index[-npredict:]
+        npredict         = config.predict
     
     forecast         = config.forecast
     num_features     = features.shape[1]
-    
-    npredict         = config.predict
     
     if future_predict:
         leads        = [0]
@@ -163,12 +195,14 @@ def dispatch(ori, dest):
         leads        = config.leads
         n_jobs       = config.n_jobs
     
-    dates            = features.index[-npredict:]
     models           = config.machine
     
     start            = time.time()
-    Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_models)(models,features, target, dates, 
-                      forecast, npredict, lead, num_features, dest, error_prediction, to_result, spaced_predict, config, future_predict, to_deterministic) for lead in tqdm(leads, desc='Ensemble prediction...'))
+    if multi_target:
+        Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_future_models)(mod, features, target, dates, forecast, npredict, dest, num_features, config) for mod in tqdm(models, desc='Ensemble prediction...'))
+    else:
+        Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_models)(models,features, target, dates, 
+                forecast, npredict, lead, num_features, dest, error_prediction, to_result, spaced_predict, config, future_predict, to_deterministic) for lead in tqdm(leads, desc='Ensemble prediction...'))
     end              = time.time()
 
     print('Time of execution: ',(end-start)/60, ' minutes.')

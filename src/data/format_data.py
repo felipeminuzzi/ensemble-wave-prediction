@@ -174,8 +174,9 @@ def prepare_data_lstm(X,y, flag, num_features):
     dim_1                        = X.shape[0]
     dim_2                        = X.shape[1]
     dim_y                        = y.shape[0]
+    breakpoint()
     if flag:
-        dim_3                     = y.shape[1]
+        dim_3                    = y.shape[1]
     X                            = X.flatten()
     y                            = y.flatten()
     #X                            = min_max_scalle_x.fit_transform(X.reshape(-1, 1))
@@ -189,6 +190,8 @@ def prepare_data_lstm(X,y, flag, num_features):
 
 def create_train_test(df, df2, npredict, lead):
     if (lead==6):
+        count = 0
+    elif lead == 0:
         count = 0
     elif (lead==12):
         count = 6
@@ -214,6 +217,41 @@ def create_train_test(df, df2, npredict, lead):
 
     x_input                  = np.hstack(predict_data)
     target_predict           = df2[-(npredict+count):]
+
+    return inputs, target, x_input, target_predict
+
+def create_train_test_multi(df, df2, npredict):
+    datas                    = []
+    for col in df.columns:
+        inputs_1             = df[col][:-npredict].values
+        inputs_1             = inputs_1.reshape((len(inputs_1), 1))
+        datas.append(inputs_1)
+    
+    inputs                   = np.hstack(datas)
+
+    datas                    = []
+    for col in df2.columns:
+        inputs_2             = df2[col][:-npredict].values
+        inputs_2             = inputs_2.reshape((len(inputs_2), 1))
+        datas.append(inputs_2)
+
+    target                   = np.hstack(datas)
+
+    predict_data = []
+    for col in df.columns:
+        inputs_2             = df[col][-npredict:].values
+        inputs_2             = inputs_2.reshape((len(inputs_2), 1))
+        predict_data.append(inputs_2)
+
+    x_input                  = np.hstack(predict_data)
+
+    predict_data = []
+    for col in df2.columns:
+        inputs_2             = df2[col][-npredict:].values
+        inputs_2             = inputs_2.reshape((len(inputs_2), 1))
+        predict_data.append(inputs_2)
+
+    target_predict           = np.hstack(predict_data)
 
     return inputs, target, x_input, target_predict
 

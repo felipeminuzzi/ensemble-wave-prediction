@@ -25,7 +25,7 @@ class TFlow():
 
     def compile_and_fit(self, model, X, y, patience=100):
         early_stopping           = tf.keras.callbacks.EarlyStopping(
-            monitor              = 'val_loss',
+            monitor              = 'loss',
             patience             = patience,
             mode                 = 'min'
         )
@@ -98,6 +98,36 @@ class TFlow():
         result                                                = self.create_output(predictions, labels, self.dates)
         
         return result, val_metric
+    
+    def create_multi_output(self):
+        train_input, train_target, test_input, test_target    = data_format.create_train_test_multi(self.df_features, self.df_target, 4)
+        x_train, y_train                                      = data_format.split_sequence(train_input, train_target, 1, self.lead, self.flag)
+
+        if self.model == 'cnn-lstm':
+           x_train                                            = data_format.convert_cnn_lstm(x_train)
+        
+        model                                                 = self.get_model(self.npredict, 1)
+        history                                               = self.compile_and_fit(model, x_train, y_train)
+        val_metric                                            = history.history
+        
+        x_test, y_test                                        = data_format.split_sequence(test_input, test_target, 1, self.lead, self.flag)
+        x_in                                                  = x_test[0].reshape(1, len(x_test[0]), self.num_features)
+        
+        if self.model == 'cnn-lstm':
+            x_in                                              = x_in.reshape(x_in.shape[0],1,1,self.num_features)
+        predictions                                           = model.predict(x_in)
+        
+        if self.model == 'dense':
+            predictions                                       = predictions[0][0].tolist()
+        else:
+            predictions                                       = predictions[0].tolist()
+
+        result                                                = pd.DataFrame()
+        result['Data']                                        = self.dates
+        result['label']                                       = y_test[0].tolist()
+        result['predict']                                     = predictions
+        
+        return result
 
     def create_output(self, pred, lab, df):
         result                   = pd.DataFrame()
@@ -116,11 +146,12 @@ class TFlow():
     def get_model(self, num_prev, shape1):
         config                   = Config()
         act_function             = config.activation
+        ka                       = 1
         if self.model == 'lstm':
             modelo             = tf.keras.Sequential([
-                tf.keras.layers.LSTM(64,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
-                tf.keras.layers.LSTM(48,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
-                tf.keras.layers.LSTM(32,  activation=act_function, return_sequences=False),
+                tf.keras.layers.LSTM(47,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
+                tf.keras.layers.LSTM(47,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
+                tf.keras.layers.LSTM(47,  activation=act_function, return_sequences=False),
                 tf.keras.layers.Dense(num_prev, kernel_initializer=tf.initializers.zeros)])
         if self.model == 'rnn':
             modelo             = tf.keras.Sequential([
@@ -130,9 +161,9 @@ class TFlow():
                 tf.keras.layers.Dense(num_prev, kernel_initializer=tf.initializers.zeros)])
         if self.model == 'cnn-lstm':
             modelo             = tf.keras.Sequential([
-                tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(64, kernel_size = 4, activation=act_function, input_shape=(shape1, self.num_features))),
-                tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(48, kernel_size = 4, activation=act_function, input_shape=(shape1, self.num_features))),
-                tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(32, kernel_size = 4, activation=act_function, input_shape=(shape1, self.num_features))),
+                tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(64, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features))),
+                tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(48, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features))),
+                tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(32, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features))),
                 tf.keras.layers.TimeDistributed(tf.keras.layers.MaxPooling1D(pool_size=1)),
                 tf.keras.layers.TimeDistributed(tf.keras.layers.Flatten()),
                 tf.keras.layers.LSTM(64,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
@@ -141,9 +172,9 @@ class TFlow():
                 tf.keras.layers.Dense(num_prev, kernel_initializer=tf.initializers.zeros)])
         if self.model == 'cnn':
             modelo             = tf.keras.Sequential([
-                tf.keras.layers.Conv1D(64, kernel_size = 4, activation=act_function, input_shape=(shape1, self.num_features)),
-                tf.keras.layers.Conv1D(48, kernel_size = 4, activation=act_function, input_shape=(shape1, self.num_features)),
-                tf.keras.layers.Conv1D(32, kernel_size = 4, activation=act_function, input_shape=(shape1, self.num_features)),
+                tf.keras.layers.Conv1D(64, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features)),
+                tf.keras.layers.Conv1D(48, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features)),
+                tf.keras.layers.Conv1D(32, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.MaxPooling1D(pool_size=1),
                 tf.keras.layers.Flatten(),
                 tf.keras.layers.Dense(num_prev, kernel_initializer=tf.initializers.zeros)])
