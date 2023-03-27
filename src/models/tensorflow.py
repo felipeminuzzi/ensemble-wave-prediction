@@ -112,7 +112,7 @@ class TFlow():
         
         x_test, y_test                                        = data_format.split_sequence(test_input, test_target, 1, self.lead, self.flag)
         x_in                                                  = x_test[0].reshape(1, len(x_test[0]), self.num_features)
-        
+
         if self.model == 'cnn-lstm':
             x_in                                              = x_in.reshape(x_in.shape[0],1,1,self.num_features)
         predictions                                           = model.predict(x_in)

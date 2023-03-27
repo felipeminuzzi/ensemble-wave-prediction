@@ -96,8 +96,9 @@ def multi_target_setup(path):
     files = glob.glob(path+'*')
     for f in files:
         if f.split('/')[-1][-3:] == 'pkl':
-            with open(f, 'rb') as handle:
-                first_predict_date  = pickle.load(handle)
+            if f.split('/')[-1][0:-4] == 'first_hour_predict':
+                with open(f, 'rb') as handle:
+                    first_predict_date  = pickle.load(handle)
         elif f.split('/')[-1][:-4].split('_')[-1] == 'features':
             df_feat = pd.read_csv(f, encoding='utf-8', sep=';', decimal=',').drop('Unnamed: 0', axis=1)
         else:
@@ -174,7 +175,6 @@ def prepare_data_lstm(X,y, flag, num_features):
     dim_1                        = X.shape[0]
     dim_2                        = X.shape[1]
     dim_y                        = y.shape[0]
-    breakpoint()
     if flag:
         dim_3                    = y.shape[1]
     X                            = X.flatten()

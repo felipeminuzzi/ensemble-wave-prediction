@@ -11,7 +11,7 @@ import pandas as pd
 seed(1)
 
 class Config():
-    def __init__(self, n_calls=4, n_initial_points=3, val_size = 0.2, epochs = 2, lag_size=7):
+    def __init__(self, n_calls=4, n_initial_points=3, val_size = 0.2, epochs = 2000, lag_size=7):
         self.n_calls          = n_calls
         self.n_initial_points = n_initial_points
         self.val_size         = val_size
@@ -22,15 +22,15 @@ class Config():
         self.forecast         = 12
         self.predict          = 120
         self.leads            = [6,12,18,24]
-        self.machine          = ['lstm','rnn','cnn-lstm','cnn','dense']#,'xgb','svr']   
-        self.n_jobs           = 1
+        self.machine          = ['lstm','rnn','cnn-lstm','cnn','dense']
+        self.n_jobs           = -1
         ##################################
         self.activation       = 'tanh' 
         self.var_to_error     = 'mean'
         self.use_error        = True
         self.use_era          = False
         self.use_spaced       = False     
-        self.future           = True
+        self.future           = False
         self.multi_target     = True
         
         self.models = {

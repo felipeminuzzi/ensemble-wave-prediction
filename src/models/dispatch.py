@@ -1,5 +1,4 @@
 
-from errno import EEXIST
 import glob
 import pandas as pd
 import numpy as np
@@ -11,8 +10,6 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 
 from src.models.tensorflow import TFlow
-from src.models.arima import ArimaModel
-from src.models.sklearn import SklearnClass
 from src.config.config import Config
 from src.data import format_data as data_format
 from src.features import features as feat 
@@ -60,28 +57,30 @@ def train_future_models(mod, features, target, dates, forecast, npredict, dest, 
     md              = TFlow(mod, features, target, dates, forecast, npredict, 0, num_features, epochs, 0, False, None)
     result          = md.create_multi_output()
     result.set_index('Data', inplace=True)
-    
-    pth             = './data/raw/noaa/processed_20211104_lead_00.csv'
+
+    pth             = glob.glob('./data/raw/noaa/*')[0]    
     df_noaa         = pd.read_csv(pth, encoding='utf-8', sep=';', decimal=',').drop('Unnamed: 0', axis=1)
     df_noaa         = df_noaa[['time','deterministic']].fillna(method='bfill')
     df_noaa['time'] = pd.to_datetime(df_noaa['time'])
     df_noaa         = df_noaa.loc[(df_noaa['time'] >= result.index.min()) & (df_noaa['time'] <= result.index.max())]
     df_noaa.set_index('time',inplace=True)
 
-    boia            = './data/raw/buoy/buoy_historic_santos.csv'
+    with open('./data/processed/boia.pkl', 'rb') as handle:
+        boia = pickle.load(handle)
+
     tgt             = pd.read_csv(boia)
     tgt['Datetime'] = pd.to_datetime(tgt['Datetime'])   
     tgt.set_index('Datetime',inplace=True)
     tgt         = tgt.loc[(tgt.index >=  result.index.min()) & (tgt.index <= result.index.max())]
     tgt         = tgt[cols]
-    breakpoint()
+
+    result          = result.join(tgt)
+    result.rename(columns = {cols[0] : 'real'}, inplace=True)
 
     result['result']= result['predict'] + df_noaa['deterministic']
-    result['real']  = tgt[cols] 
     result['noaa']  = df_noaa['deterministic']
-
-    result.to_csv(f'{dest}predictions_{0}_{reg}.csv')
-
+    result.fillna(method='bfill', inplace=True)
+    result.to_csv(f'{dest}predictions_{0}_{mod}.csv')
 
 def correct_result(df, df_feat, reg, boia, conf, path):
     cols        = conf.target
@@ -179,7 +178,6 @@ def dispatch(ori, dest):
     if multi_target:
         target, features, dates     = data_format.multi_target_setup(ori)
         npredict                    = len(dates)
-        to_result, to_deterministic = None, None
     else:
         features, target, to_result, to_deterministic = setup(error_prediction,path,use_era)
         dates            = features.index[-npredict:]
@@ -196,7 +194,7 @@ def dispatch(ori, dest):
         n_jobs       = config.n_jobs
     
     models           = config.machine
-    
+
     start            = time.time()
     if multi_target:
         Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_future_models)(mod, features, target, dates, forecast, npredict, dest, num_features, config) for mod in tqdm(models, desc='Ensemble prediction...'))
