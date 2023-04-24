@@ -59,6 +59,7 @@ To plot the results, we run:
 ```sh
 wave_ensemble generate-graph -d ./data/result/
 ```
+The figures will be saved inside a folder with the same name as the result in the ``reports`` folder.
 
 ## Meta
 
