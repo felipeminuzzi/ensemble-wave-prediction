@@ -51,7 +51,7 @@ wave_ensemble create_data -o ./data/raw/noaa/ -d ./data/raw/processed -b ./data/
 This will create an eight (or any integer inputed in -l) days forecast. To train and run forecast, we run:
 
 ```sh
-wave_ensemble train-models -o ./data/processed/ -d ./data/result/
+wave_ensemble train-models -o ./data/processed/ -d ./data/result/ -n 'santos'
 ```
 
 To plot the results, we run:
