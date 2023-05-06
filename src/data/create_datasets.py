@@ -148,7 +148,9 @@ def dispatch(ori, dest, buoy_path, name, lag):
     last_date   = folders[-1].split('/')[-2]
     noaa_result = folders[-1]+typ+'/'+f'processed_{last_date}_lead_00.csv'
     df_noaa     = pd.read_csv(noaa_result, encoding='utf-8', sep=';', decimal=',').drop(['Unnamed: 0'], axis=1)
-    df_noaa.to_csv('/home/storage/minuzzi/Machine_learning/ensemble-wave-prediction/data/raw/noaa/noaa_forecast.csv', encoding='utf-8', sep=';', decimal=',')
+
+    pth_noaa    = feat.format_path(f'/home/storage/minuzzi/Machine_learning/ensemble-wave-prediction/data/raw/noaa/{name}/')
+    df_noaa.to_csv(f'{pth_noaa}noaa_forecast.csv', encoding='utf-8', sep=';', decimal=',')
 
     save_name         = f'{dest}boia.pkl'
     with open(save_name, 'wb') as fp:

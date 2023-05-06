@@ -22,8 +22,9 @@ def create_data(ori, dest, buoy_path, name, lag):
 @click.command()
 @click.option('-o', '--ori', help='time series path', required=True)
 @click.option('-d', '--dest', help='time series result destination', required=True)
+@click.option('-n', '--name', help='name of buoy location with processed data', required=True)
 def train_models(ori, dest):
-    dispatch.dispatch(ori, dest)
+    dispatch.dispatch(ori, dest, name)
 
 @click.command()
 @click.option('-d', '--dest', help='time series result destination', required=True)

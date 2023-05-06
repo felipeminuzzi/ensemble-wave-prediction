@@ -49,7 +49,7 @@ def train_models(models, features, target, dates, forecast, npredict, lead, num_
         result.to_csv(f'{dest}predictions_{lead}_{reg}.csv')
         #save_metric(dest,lead,reg,metric)
 
-def train_future_models(mod, features, target, dates, forecast, npredict, dest, num_features, conf):
+def train_future_models(mod, features, target, dates, forecast, npredict, dest, num_features, conf, name):
     config          = conf
     epochs          = config.epochs
     cols            = conf.target
@@ -58,14 +58,14 @@ def train_future_models(mod, features, target, dates, forecast, npredict, dest, 
     result          = md.create_multi_output()
     result.set_index('Data', inplace=True)
 
-    pth             = glob.glob('./data/raw/noaa/*')[0]    
+    pth             = glob.glob(f'./data/raw/noaa/{name}/*')[0]    
     df_noaa         = pd.read_csv(pth, encoding='utf-8', sep=';', decimal=',').drop('Unnamed: 0', axis=1)
     df_noaa         = df_noaa[['time','deterministic']].fillna(method='bfill')
     df_noaa['time'] = pd.to_datetime(df_noaa['time'])
     df_noaa         = df_noaa.loc[(df_noaa['time'] >= result.index.min()) & (df_noaa['time'] <= result.index.max())]
     df_noaa.set_index('time',inplace=True)
 
-    with open('./data/processed/boia.pkl', 'rb') as handle:
+    with open(f'./data/processed/{name}/boia.pkl', 'rb') as handle:
         boia = pickle.load(handle)
 
     tgt             = pd.read_csv(boia)
@@ -164,7 +164,7 @@ def setup(error_pred, pth, era):
         features,target  = data_format.create_df(path_target)
     return features, target, to_result, to_deterministic
 
-def dispatch(ori, dest):
+def dispatch(ori, dest, name):
     config           = Config()
     error_prediction = config.use_error
     use_era          = config.use_era
@@ -197,7 +197,7 @@ def dispatch(ori, dest):
 
     start            = time.time()
     if multi_target:
-        Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_future_models)(mod, features, target, dates, forecast, npredict, dest, num_features, config) for mod in tqdm(models, desc='Ensemble prediction...'))
+        Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_future_models)(mod, features, target, dates, forecast, npredict, dest, num_features, config, name) for mod in tqdm(models, desc='Ensemble prediction...'))
     else:
         Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_models)(models,features, target, dates, 
                 forecast, npredict, lead, num_features, dest, error_prediction, to_result, spaced_predict, config, future_predict, to_deterministic) for lead in tqdm(leads, desc='Ensemble prediction...'))
