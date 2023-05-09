@@ -23,7 +23,7 @@ class Config():
         self.predict          = 120
         self.leads            = [6,12,18,24]
         self.machine          = ['lstm','rnn','cnn-lstm','cnn','dense']
-        self.n_jobs           = -1
+        self.n_jobs           = 1
         ##################################
         self.activation       = 'tanh' 
         self.var_to_error     = 'mean'
