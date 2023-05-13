@@ -11,3 +11,4 @@ the five different neural networks are applied and an ensemble of the results is
 - full_v2: same as before, predictions of 8 days. 
 - full_v3: increase number of hidden layers, prediction for 8 days.
 - full_v4: same numer of hidden layers as before, but prediction for 16 days
+- full_v5: change the activation function: sigmoid - 16 days predictions, several hidden layers
