@@ -13,6 +13,7 @@ from src.models.tensorflow import TFlow
 from src.config.config import Config
 from src.data import format_data as data_format
 from src.features import features as feat 
+from src.models import lstm_future
 
 def train_models(models, features, target, dates, forecast, npredict, lead, num_features, dest, error_prediction, pth, flag, conf, future_predict, pth2):
     config          = conf
@@ -49,7 +50,7 @@ def train_models(models, features, target, dates, forecast, npredict, lead, num_
         result.to_csv(f'{dest}predictions_{lead}_{reg}.csv')
         #save_metric(dest,lead,reg,metric)
 
-def train_future_models(mod, features, target, dates, forecast, npredict, dest, num_features, conf, name):
+def train_future_models(mod, features, target, dates, forecast, npredict, dest, num_features, conf, name, future_predict):
     config          = conf
     epochs          = config.epochs
     cols            = conf.target
@@ -80,6 +81,11 @@ def train_future_models(mod, features, target, dates, forecast, npredict, dest, 
     result['result']= result['predict'] + df_noaa['deterministic']
     result['noaa']  = df_noaa['deterministic']
     result.fillna(method='bfill', inplace=True)
+
+    if future_predict:
+        df_pred_era5 = lstm_future.run_model(name,result)
+    import ipdb; ipdb.set_trace()
+
     result.to_csv(f'{dest}predictions_{0}_{mod}.csv')
 
 def correct_result(df, df_feat, reg, boia, conf, path):
@@ -186,19 +192,15 @@ def dispatch(ori, dest, name):
     forecast         = config.forecast
     num_features     = features.shape[1]
     
-    if future_predict:
-        leads        = [0]
-        n_jobs       = 1
-    else:
-        leads        = config.leads
-        n_jobs       = config.n_jobs
-    
+    leads            = config.leads
+    n_jobs           = config.n_jobs
     models           = config.machine
 
     start            = time.time()
     if multi_target:
-        Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_future_models)(mod, features, target, dates, forecast, npredict, dest, num_features, config, name) for mod in tqdm(models, desc='Ensemble prediction...'))
+        Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_future_models)(mod, features, target, dates, forecast, npredict, dest, num_features, config, name, future_predict) for mod in tqdm(models, desc='Ensemble prediction...'))
     else:
+        leads        = [0]
         Parallel(n_jobs=n_jobs,backend='multiprocessing')(delayed(train_models)(models,features, target, dates, 
                 forecast, npredict, lead, num_features, dest, error_prediction, to_result, spaced_predict, config, future_predict, to_deterministic) for lead in tqdm(leads, desc='Ensemble prediction...'))
     end              = time.time()
