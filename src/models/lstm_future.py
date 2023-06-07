@@ -45,10 +45,10 @@ def compile_and_fit(model, X, y, patience=20):
     history                  = model.fit(
         X,
         y,
-        epochs               = 200,
+        epochs               = 100,
         validation_split     = 0.2,
         callbacks            = [early_stopping],
-        verbose              = 0
+        verbose              = 1
     )
     return history
 
@@ -108,17 +108,19 @@ def create_non_lead_future(df, npredict, forecast, num_features, name):
     return result
 
 def run_model(name, df_results):
-    df_era5      = pd.read_csv('./data/raw/era/era5_reanalysis.csv', encoding='utf-8', sep=';', decimal=',')
-    df_era5      = df_era5[df_era5['time'] <= df_results['Data'].values[-1]]
-    start        = time.time()
-    npredict     = df_results.shape[0]
-    forecast     = int(npredict*2)
-    num_features = 1
+    df_results.reset_index(inplace=True)
+    df_era5         = pd.read_csv('./data/raw/era/era5_reanalysis.csv', encoding='utf-8', sep=';', decimal=',')
+    df_era5['time'] = pd.to_datetime(df_era5['time'])
+    df_era5         = df_era5[df_era5['time'] <= df_results['Data'].values[-1]]
+    start           = time.time()
+    npredict        = df_results.shape[0]
+    forecast        = int(npredict*2)
+    num_features    = 1
 
     df_pred_era5 = create_non_lead_future(df_era5, npredict, forecast, num_features, name)
     df_pred_era5.to_csv(f'./data/raw/era/lstm_{name}_predictions_future.csv')
 
-    end          = time.time()
+    end             = time.time()
     print('Time of execution: ',(end-start)/60, ' minutes.')
 
     return df_pred_era5

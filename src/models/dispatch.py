@@ -5,6 +5,8 @@ import numpy as np
 import time
 import pickle
 import os
+import warnings
+warnings.filterwarnings('ignore')
 
 from joblib import Parallel, delayed
 from tqdm import tqdm
@@ -84,7 +86,9 @@ def train_future_models(mod, features, target, dates, forecast, npredict, dest, 
 
     if future_predict:
         df_pred_era5 = lstm_future.run_model(name,result)
-    import ipdb; ipdb.set_trace()
+        result.set_index('Data',inplace=True)
+        df_pred_era5.set_index('Data', inplace=True)
+        result = result.join(df_pred_era5)
 
     result.to_csv(f'{dest}predictions_{0}_{mod}.csv')
 

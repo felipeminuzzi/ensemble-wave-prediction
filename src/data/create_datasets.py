@@ -3,6 +3,8 @@ import pandas as pd
 import glob
 import pickle
 import datetime as dt
+import warnings
+warnings.filterwarnings('ignore')
 
 from tqdm import tqdm
 from src.features import features as feat 

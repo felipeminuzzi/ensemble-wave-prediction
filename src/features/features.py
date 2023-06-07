@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import os
+import warnings
+warnings.filterwarnings('ignore')
 import matplotlib.pyplot as plt
 
 def mape(y_true, y_pred):
