@@ -6,9 +6,4 @@ The simulations are heald for four different buoys locations in the coast of bra
 the five different neural networks are applied and an ensemble of the results is developed. 
 
 - v8: first simulation, for testing the code, only buoy location of Santos, 6 days of predictiion.
-- full_v0: simulations with 3 hidden layers, predictions of 16 days.
-- full_v1: same as before, predictions of  12 days.
-- full_v2: same as before, predictions of 8 days. 
-- full_v3: increase number of hidden layers, prediction for 8 days.
-- full_v4: same numer of hidden layers as before, but prediction for 16 days
-- full_v5: change the activation function: sigmoid - 16 days predictions, several hidden layers
+- full_v0: simulations with 6 hidden layers, predictions of 16 days, activation - tanh
