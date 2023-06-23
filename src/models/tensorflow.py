@@ -149,13 +149,16 @@ class TFlow():
         ka                       = 1
         if self.model == 'lstm':
             modelo             = tf.keras.Sequential([
+                tf.keras.layers.LSTM(512,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
+                tf.keras.layers.LSTM(256,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.LSTM(128,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.LSTM(64,   activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),                                
-                tf.keras.layers.LSTM(48,   activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),                                
                 tf.keras.layers.LSTM(32,   activation=act_function, return_sequences=False),
                 tf.keras.layers.Dense(num_prev, kernel_initializer=tf.initializers.zeros)])
         if self.model == 'rnn':
             modelo             = tf.keras.Sequential([
+                tf.keras.layers.SimpleRNN(512,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),                
+                tf.keras.layers.SimpleRNN(256,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.SimpleRNN(128,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.SimpleRNN(64,   activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.SimpleRNN(48,   activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
@@ -163,12 +166,16 @@ class TFlow():
                 tf.keras.layers.Dense(num_prev, kernel_initializer=tf.initializers.zeros)])
         if self.model == 'cnn-lstm':
             modelo             = tf.keras.Sequential([
+                tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(512, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features))),
+                tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(256, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features))),
                 tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(128, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features))),
                 tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(64,  kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features))),
                 tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(48,  kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features))),
                 tf.keras.layers.TimeDistributed(tf.keras.layers.Conv1D(32,  kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features))),
                 tf.keras.layers.TimeDistributed(tf.keras.layers.MaxPooling1D(pool_size=1)),
                 tf.keras.layers.TimeDistributed(tf.keras.layers.Flatten()),
+                tf.keras.layers.LSTM(512,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
+                tf.keras.layers.LSTM(256,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.LSTM(128,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.LSTM(64,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.LSTM(48,  activation=act_function, return_sequences=True, input_shape=(shape1, self.num_features)),
@@ -176,6 +183,8 @@ class TFlow():
                 tf.keras.layers.Dense(num_prev, kernel_initializer=tf.initializers.zeros)])
         if self.model == 'cnn':
             modelo             = tf.keras.Sequential([
+                tf.keras.layers.Conv1D(512, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features)),
+                tf.keras.layers.Conv1D(256, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.Conv1D(128, kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.Conv1D(64,  kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.Conv1D(48,  kernel_size = ka, activation=act_function, input_shape=(shape1, self.num_features)),
@@ -185,6 +194,8 @@ class TFlow():
                 tf.keras.layers.Dense(num_prev, kernel_initializer=tf.initializers.zeros)])
         if self.model == 'dense':
             modelo             = tf.keras.Sequential([
+                tf.keras.layers.Dense(512,  activation=act_function, input_shape=(shape1, self.num_features)),
+                tf.keras.layers.Dense(256,  activation=act_function, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.Dense(128,  activation=act_function, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.Dense(64,   activation=act_function, input_shape=(shape1, self.num_features)),
                 tf.keras.layers.Dense(48,   activation=act_function, input_shape=(shape1, self.num_features)),
