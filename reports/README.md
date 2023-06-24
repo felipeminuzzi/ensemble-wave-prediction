@@ -7,3 +7,5 @@ the five different neural networks are applied and an ensemble of the results is
 
 - v8: first simulation, for testing the code, only buoy location of Santos, 6 days of predictiion.
 - full_v0: simulations with 6 hidden layers, predictions of 16 days, activation - tanh
+- full_v1: simulation with 3 hidden layers, prediction of 16 days, activation - tanh
+- full_v2: simulation with 6 hidden layers, prediction of 16 days, activation - sigmoid
