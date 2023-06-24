@@ -16,6 +16,10 @@ def erro(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.abs((y_true - y_pred)/y_true)*100
 
+def erro_abs(y_true, y_pred):
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.abs((y_true - y_pred))
+
 def mean_erro(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred)))
@@ -241,9 +245,14 @@ def create_multi_graph(files,save_path):
     plt.savefig(save_path+'figure_5.png')
 
     plt.figure(6)
-    create_error_multi(lead,reais[0],predictions[0],xx[0],yy[0], False, True, 'Noaa_cnn-lstm')
+    create_error_multi(reais[0],predictions[0],xx[0],yy[0], 'Noaa_cnn-lstm')
     plt.figure(6).text(0.06, 0.5, 'Relative error - $\Delta_{rel}$ (%)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_6.png')
+
+    plt.figure(7)
+    create_error_abs(reais[0],predictions[0],xx[0],yy[0], 'Noaa_cnn-lstm')
+    plt.figure(7).text(0.06, 0.5, 'Absolute error - $\Delta_{abs}$ (m)', ha='center', va='center', rotation='vertical')
+    plt.savefig(save_path+'figure_7.png')
 
 def create_weighted_average(df, dct_metric):
     soma = 0
@@ -319,7 +328,7 @@ def create_plots_multi(lead, df_true, df_predict,x,y, flag, antigo, tgt):
     plt.legend()
     plt.xticks(x,y, rotation=15)
 
-def create_error_multi(lead, df_true, df_predict,x,y, flag, antigo, tgt):
+def create_error_multi(df_true, df_predict,x,y, tgt):
     ls      = df_predict.columns.to_list()
     leg_dict = {'erro_real_1':'Error NOAA x Buoy', 'Hs_real_1':'Buoy - real observed value', 'Noaa_cnn-lstm':'Ensemble numerical model - NOAA'}
     lab = leg_dict[tgt]
@@ -328,6 +337,19 @@ def create_error_multi(lead, df_true, df_predict,x,y, flag, antigo, tgt):
     plt.plot(df_true.index, error1 , '--', label=f'{lab}', color='black')
     for col in ls[-1:]:
         error2 = erro(df_true['Hs_real_1'], df_predict[col]).round(2)
+        plt.plot(df_predict.index, error2 , '-', label=f'{col}')
+    plt.legend()
+    plt.xticks(x,y, rotation=15)
+
+def create_error_abs(df_true, df_predict,x,y,tgt):
+    ls      = df_predict.columns.to_list()
+    leg_dict = {'erro_real_1':'Error NOAA x Buoy', 'Hs_real_1':'Buoy - real observed value', 'Noaa_cnn-lstm':'Ensemble numerical model - NOAA'}
+    lab = leg_dict[tgt]
+    
+    error1 = erro_abs(df_true['Hs_real_1'], df_true[tgt]).round(2)
+    plt.plot(df_true.index, error1 , '--', label=f'{lab}', color='black')
+    for col in ls[-1:]:
+        error2 = erro_abs(df_true['Hs_real_1'], df_predict[col]).round(2)
         plt.plot(df_predict.index, error2 , '-', label=f'{col}')
     plt.legend()
     plt.xticks(x,y, rotation=15)

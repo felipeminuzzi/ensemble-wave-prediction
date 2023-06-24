@@ -27,7 +27,7 @@ class Config():
         self.machine          = ['lstm','rnn','cnn-lstm','cnn','dense']
         self.n_jobs           = -1
         ##################################
-        self.activation       = 'sigmoid'#'tanh' 
+        self.activation       = 'tanh'#'tanh' 
         self.var_to_error     = 'mean'
         self.use_error        = True
         self.use_era          = False
