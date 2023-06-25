@@ -21,6 +21,7 @@ def create_new(folders, typ, buoy, dest, lag):
     for j in tqdm(range(0,max_number_pred), desc='Processing dataset...'):
         lista_cols_feat = []
         lista_cols_tgt  = []
+        lista_cols_rel  = []
         for fold in folders:
             proces_folders = glob.glob(fold+typ+'/*')
             proces_folders.sort()    
@@ -34,20 +35,26 @@ def create_new(folders, typ, buoy, dest, lag):
                     real = df_boia.loc[df_boia['Datetime'] == pd.to_datetime(hour)]['Wvht'].values[0]
                 except:
                     real = real
-                erro  = real-value
+                erro     = real-value
+                erro_rel = np.abs(real-value)/np.abs(real)
                 lista_cols_feat.append(value)
                 lista_cols_tgt.append(erro)
+                lista_cols_rel.append(erro_rel)
+
         dict_features[f'feat_{j}'] = lista_cols_feat
         dict_target[f'tgt_{j}']    = lista_cols_tgt
+        dict_rel[f'rel_{j}']       = lista_cols_rel
         list_dates.append(hour)
         if j == 0:
             first_hour_predict = pd.to_datetime(hour)
 
     df_final_target   =  pd.DataFrame(dict_target)
     df_final_features =  pd.DataFrame(dict_features)
+    df_final_rel      =  pd.DataFrame(dict_rel)
 
     df_final_target[0:-1].to_csv(f'{dest}noaa_data_target.csv', encoding='utf-8', sep=';', decimal=',')
     df_final_features[0:-1].to_csv(f'{dest}noaa_data_features.csv', encoding='utf-8', sep=';', decimal=',')
+    df_final_rel[0:-1].to_csv(f'{dest}noaa_data_relative.csv', encoding='utf-8', sep=';', decimal=',')
 
     save_name         = f'{dest}first_hour_predict.pkl'
     with open(save_name, 'wb') as fp:
