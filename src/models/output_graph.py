@@ -254,6 +254,50 @@ def create_multi_graph(files,save_path):
     plt.figure(7).text(0.06, 0.5, 'Absolute error - $\Delta_{abs}$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_7.png')
 
+    return predictions[0]
+
+def historical_error(output,save_path,df):
+    name            = save_path.split('/')[-2][:-8]
+    df_target       = pd.read_csv(f'./data/processed/{name}/noaa_data_target.csv', encoding='utf-8', sep=';', decimal=',').drop('Unnamed: 0', axis=1)
+    df_rel          = pd.read_csv(f'./data/processed/{name}/noaa_data_relative.csv', encoding='utf-8', sep=';', decimal=',').drop('Unnamed: 0', axis=1)
+    lead_lists      = [i for i in range(3,df_target.shape[1]*3+1,3)]
+
+    with open(f'./data/processed/{name}/boia.pkl', 'rb') as handle:
+        boia        = pickle.load(handle)
+    df_boia         = pd.read_csv(boia).set_index('Datetime')
+
+    df              =  df.join(df_boia['Wvht'])
+    df['error']     = df['Wvht'] - df['NN mean - this work']
+    df['error_rel'] = np.abs(df['Wvht'] - df['NN mean - this work'])/np.abs(df['Wvht'])
+    df['error_abs'] = np.abs(df['Wvht'] - df['NN mean - this work'])
+    df['noaa_mean_error'] = df_target.mean(axis=0).values
+
+    df_target       = np.abs(df_target)
+    df['noaa_mean_error_abs'] = df_target.mean(axis=0).values
+    df['noaa_mean_error_rel'] = df_rel.mean(axis=0).values
+    df['Lead'] = lead_lists
+
+    plt.figure()
+    plt.subplot(3,1,1)
+    plt.plot(df['Lead'], df['noaa_mean_error'] , '--', label='NOAA historical error', color='black')
+    plt.plot(df['Lead'], df['error'] , label='NN mean - this work error')
+    plt.ylabel('Error (m)')
+    plt.legend()
+
+    plt.subplot(3,1,2)
+    plt.plot(df['Lead'], df['noaa_mean_error_rel']*100 , '--', label='NOAA historical relative error', color='black')
+    plt.plot(df['Lead'], df['error_rel']*100 , label='NN mean - this work relative error')
+    plt.ylabel('Relative error - $\Delta_{rel}$ (%)')
+    plt.legend()
+
+    plt.subplot(3,1,3)
+    plt.plot(df['Lead'], df['noaa_mean_error_abs'] , '--', label='NOAA historical absolute error', color='black')
+    plt.plot(df['Lead'], df['error_abs'] , label='NN mean - this work absolute error')
+    plt.xlabel('Lead time')
+    plt.ylabel('Absolute error - $\Delta_{abs}$ (m)')
+    plt.legend()
+    plt.savefig(save_path+'historical_errors.png')
+
 def create_weighted_average(df, dct_metric):
     soma = 0
     aux = pd.DataFrame()
@@ -437,4 +481,5 @@ def create_graph(dest):
     fold_name_report = dest.split('/')[-2]
     save_path        = f'./reports/{fold_name_report}/'
     save_path        = feat.format_path(save_path)
-    create_multi_graph(output,save_path)
+    df_result        = create_multi_graph(output,save_path)
+    historical_error(output,save_path, df_result)
