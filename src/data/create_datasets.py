@@ -14,6 +14,7 @@ def create_new(folders, typ, buoy, dest, lag):
     df_boia['Datetime'] = pd.to_datetime(df_boia['Datetime'])
     dict_features       = {}
     dict_target         = {}
+    dict_rel            = {}
     list_dates          = []
     first_train_date    = pd.to_datetime(folders[0].split('/')[-2] + ' 03:00:00')
 
