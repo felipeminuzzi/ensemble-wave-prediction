@@ -10,3 +10,5 @@ the five different neural networks are applied and an ensemble of the results is
 - full_v1: simulation with 3 hidden layers, prediction of 16 days, activation - tanh
 - full_v2: simulation with 6 hidden layers, prediction of 16 days, activation - sigmoid
 - full_v3: simulations with 6 hidden layers, predictions of 10 days, activation - tanh
+- full_v4: simulations with 6 hidden layers, predictions of 10 days, activation - tanh with lstm_future
+- full_v5: simulations with 6 hidden layers, predictions of 16 days, activation - tanh with lstm_future
