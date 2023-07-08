@@ -198,15 +198,31 @@ def create_multi_graph(files,save_path):
         df.set_index('Data', inplace=True)
         df.rename(columns = {'predict' : f'erro_{model}', 'label' : f'erro_real_{j}', 
                              'real' : f'Hs_real_{j}', 'result' : f'Hs_{model}', 'noaa' : f'Noaa_{model}'}, inplace=True)
+        if df.shape[1] == 7:
+            df[f'era5_corrected_{model}'] = df['hs_predict_era5'] + df[f'erro_{model}']
+            df.rename(columns = {'hs_predict_era5': f'hs_predict_era5_{model}', 'hs_era5_real' : f'hs_era5_real_{j}'}, inplace=True)
+
         dfs_6.append(df)
         j += 1
 
     test_6      = pd.concat(dfs_6, axis=1)
-    real_6      = test_6[['erro_real_1','Hs_real_1','Noaa_cnn-lstm']]
+    if df.shape[1] == 8:
+        real_6      = test_6[['erro_real_1','Hs_real_1','Noaa_cnn-lstm','hs_era5_real_1']]
+    else:
+        real_6      = test_6[['erro_real_1','Hs_real_1','Noaa_cnn-lstm']]
+
     erros_6     = test_6[['erro_cnn-lstm','erro_rnn','erro_dense','erro_cnn','erro_lstm']]
+    if df.shape[1] == 8:
+        era_6       = test_6[['era5_corrected_cnn-lstm','era5_corrected_rnn','era5_corrected_dense','era5_corrected_cnn','era5_corrected_lstm']]
+        era_6['NN mean - this work'] = era_6.mean(axis=1)
+        era_6_preds = test_6[['hs_predict_era5_cnn-lstm', 'hs_predict_era5_rnn', 'hs_predict_era5_dense', 'hs_predict_era5_cnn', 'hs_predict_era5_lstm']]
+        test_6.drop(['era5_corrected_cnn-lstm','era5_corrected_rnn','era5_corrected_dense','era5_corrected_cnn','era5_corrected_lstm',
+                     'hs_predict_era5_cnn-lstm', 'hs_predict_era5_rnn', 'hs_predict_era5_dense', 'hs_predict_era5_cnn', 'hs_predict_era5_lstm',
+                     'hs_era5_real_1','hs_era5_real_2','hs_era5_real_3','hs_era5_real_4','hs_era5_real_5'], axis=1, inplace=True)
+
     erros_6['NN mean - this work'] = erros_6.mean(axis=1)
     test_6.drop(['erro_real_1','Hs_real_1','erro_real_2','Hs_real_2','erro_real_3','Hs_real_3','Noaa_cnn-lstm','Noaa_rnn','Noaa_dense','Noaa_cnn','Noaa_lstm',
-                 'erro_real_4','Hs_real_4','erro_real_5','Hs_real_5','erro_cnn-lstm','erro_rnn','erro_dense','erro_cnn','erro_lstm' ],axis=1, inplace=True)
+                 'erro_real_4','Hs_real_4','erro_real_5','Hs_real_5','erro_cnn-lstm','erro_rnn','erro_dense','erro_cnn','erro_lstm' ],axis=1, inplace=True)        
     test_6['NN mean - this work'] = test_6.mean(axis=1)
     
     n1          = real_6.shape[0]
@@ -218,7 +234,7 @@ def create_multi_graph(files,save_path):
 
     ls      = predictions[0].columns.to_list()
     lead = '0'
-    
+
     plt.figure(1)
     create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], True, False, 'Hs_real_1')
     plt.figure(1).text(0.06, 0.5, 'Wave height - $H_s$ (m)', ha='center', va='center', rotation='vertical')
@@ -254,7 +270,31 @@ def create_multi_graph(files,save_path):
     plt.figure(7).text(0.06, 0.5, 'Absolute error - $\Delta_{abs}$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_7.png')
 
+    if df.shape[1] == 8:
+        create_era5_plots(era_6_preds, era_6, test_6, real_6, xx[0], yy[0],save_path)
+    
     return predictions[0]
+
+def create_era5_plots(era_pred, era_corrected, noaa, real, x, y,save_path):
+    
+    plt.figure()
+    plt.plot(era_corrected.index, real['Hs_real_1'], '-*', label=f'Buoy - real observed value',color='black')
+
+    mapes = mape(real['Hs_real_1'], real['Noaa_cnn-lstm']).round(2)
+    label_name = f'Ensemble numerical model (NOAA): MAPE: {mapes}'
+    plt.plot(era_corrected.index, real['Noaa_cnn-lstm'] , '--', label=label_name, color='blue')
+
+    mapes = mape(real['Hs_real_1'], noaa['NN mean - this work']).round(2)
+    label_name = f'NOAA NN mean: MAPE: {mapes}'
+    plt.plot(era_corrected.index, noaa['NN mean - this work'] , '-', label=label_name)
+
+    mapes = mape(real['Hs_real_1'], era_corrected['NN mean - this work']).round(2)
+    label_name = f'ERA5 NN mean: MAPE: {mapes}'    
+    plt.plot(era_corrected.index, era_corrected['NN mean - this work'] , '-', label=label_name, color='red')
+
+    plt.legend()
+    plt.xticks(x,y, rotation=15)
+    plt.savefig(save_path+'figure_era_pred_1.png')
 
 def historical_error(output,save_path,df):
     name            = save_path.split('/')[-2][:-8]
