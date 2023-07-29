@@ -11,6 +11,7 @@ src/features/features.py
 src/models/__init__.py
 src/models/arima.py
 src/models/dispatch.py
+src/models/lstm_future.py
 src/models/output_graph.py
 src/models/sklearn.py
 src/models/tensorflow.py
