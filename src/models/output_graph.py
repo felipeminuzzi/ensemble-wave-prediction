@@ -318,24 +318,12 @@ def historical_error(output,save_path,df):
     df['Lead'] = lead_lists
 
     plt.figure()
-    plt.subplot(3,1,1)
-    plt.plot(df['Lead'], df['noaa_mean_error'] , '--', label='NOAA historical error', color='black')
-    plt.plot(df['Lead'], df['error'] , label='NN mean - this work error')
-    plt.ylabel('Error (m)')
-    plt.legend()
-
-    plt.subplot(3,1,2)
     plt.plot(df['Lead'], df['noaa_mean_error_rel']*100 , '--', label='NOAA historical relative error', color='black')
     plt.plot(df['Lead'], df['error_rel']*100 , label='NN mean - this work relative error')
     plt.ylabel('Relative error - $\Delta_{rel}$ (%)')
+    plt.xlabel('Lead time')
     plt.legend()
 
-    plt.subplot(3,1,3)
-    plt.plot(df['Lead'], df['noaa_mean_error_abs'] , '--', label='NOAA historical absolute error', color='black')
-    plt.plot(df['Lead'], df['error_abs'] , label='NN mean - this work absolute error')
-    plt.xlabel('Lead time')
-    plt.ylabel('Absolute error - $\Delta_{abs}$ (m)')
-    plt.legend()
     plt.savefig(save_path+'historical_errors.png')
 
 def create_weighted_average(df, dct_metric):
@@ -477,16 +465,15 @@ def create_plots_error(lead, df_true, df_predict,x,y,flag):
 
 def get_metrics(data):
     dict_metrics     = {}
+    
     for f in data:
         with open(f, 'rb') as handle:
             metrics  = pickle.load(handle)
             model    = f.split('/')[-1].split('_')[-1][:-4] 
-            lead     = f.split('/')[-1].split('_')[-2]
-            val_mape = metrics['val_mean_absolute_percentage_error'][-1]
-            name     = str(model)+'_'+str(lead)
-            dict_metrics[name] = val_mape
+            val_mape = metrics['mean_squared_error'][-1]
+            dict_metrics[model] = val_mape
 
-    return dict_metrics
+    return pd.DataFrame(dict_metrics, index = ['MSE']).T
 
 def organize_old_result(files):
     dfs         = {}
@@ -517,9 +504,12 @@ def correct_output(files,dest):
         df.to_csv(f'{dest}predictions_{lead}_{model}.csv')
 
 def create_graph(dest):
+    df_metrics       = get_metrics(glob.glob(dest+'metric/*'))
     output           = glob.glob(dest+'*.csv')
     fold_name_report = dest.split('/')[-2]
     save_path        = f'./reports/{fold_name_report}/'
     save_path        = feat.format_path(save_path)
     df_result        = create_multi_graph(output,save_path)
     historical_error(output,save_path, df_result)
+
+    breakpoint()
