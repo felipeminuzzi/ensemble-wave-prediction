@@ -58,7 +58,7 @@ def train_future_models(mod, features, target, dates, forecast, npredict, dest, 
     cols            = conf.target
 
     md              = TFlow(mod, features, target, dates, forecast, npredict, 0, num_features, epochs, 0, False, None)
-    result          = md.create_multi_output()
+    result, metric  = md.create_multi_output()
     result.set_index('Data', inplace=True)
 
     pth             = glob.glob(f'./data/raw/noaa/{name}/*')[0]    
@@ -91,6 +91,7 @@ def train_future_models(mod, features, target, dates, forecast, npredict, dest, 
         result = result.join(df_pred_era5)
 
     result.to_csv(f'{dest}predictions_{0}_{mod}.csv')
+    save_metric(dest,0,mod,metric)
 
 def correct_result(df, df_feat, reg, boia, conf, path):
     cols        = conf.target

@@ -127,7 +127,7 @@ class TFlow():
         result['label']                                       = y_test[0].tolist()
         result['predict']                                     = predictions
         
-        return result
+        return result, val_metric
 
     def create_output(self, pred, lab, df):
         result                   = pd.DataFrame()
