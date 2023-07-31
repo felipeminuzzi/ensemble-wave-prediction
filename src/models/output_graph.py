@@ -481,7 +481,8 @@ def create_plot_weighted(df, df_met, df_real, save_path):
     mape_wei        = mape(df_real['Hs_real_1'], df_weighted['NN weighted avg - this work']).round(2)
     mape_nn         = mape(df_real['Hs_real_1'], df['NN mean - this work']).round(2)
     mapes           = mape(df_real['Hs_real_1'], df_real['Noaa_cnn-lstm']).round(2)
-    
+   
+    plt.figure() 
     plt.plot(df.index, df_real['Hs_real_1'], '-*', label=f'Buoy - real observed value',color='black')
     
     label_name = f'Ensemble numerical model (NOAA): MAPE: {mapes}'
