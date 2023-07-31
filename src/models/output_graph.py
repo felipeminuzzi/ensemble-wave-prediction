@@ -273,7 +273,7 @@ def create_multi_graph(files,save_path):
     if df.shape[1] == 8:
         create_era5_plots(era_6_preds, era_6, test_6, real_6, xx[0], yy[0],save_path)
     
-    return predictions[0]
+    return predictions[0], real_6
 
 def create_era5_plots(era_pred, era_corrected, noaa, real, x, y,save_path):
     
@@ -463,15 +463,50 @@ def create_plots_error(lead, df_true, df_predict,x,y,flag):
     plt.legend()
     plt.xticks(x,y, rotation=30)
 
+def create_plot_weighted(df, df_met, df_real, save_path):
+
+    df_weighted     = pd.DataFrame()
+    soma            = df_met.sum(axis=0)[0]
+    
+    for col in df.columns[0:-1]:
+        metrica          = df_met.loc[col].values[0]
+        df_weighted[col] = df[col]*metrica
+
+    df_weighted['NN weighted avg - this work'] = df_weighted.sum(axis=1)/soma
+    
+    n1          = df.shape[0]
+    x           = [[0, int(n1/4), int(n1/2), int(3*n1/4), n1-1]]
+    y           = [[df.index[0],df.index[int(n1/4)],df.index[int(n1/2)],df.index[int(3*n1/4)],df.index[n1-1]]]
+    
+    mape_wei        = mape(df_real['Hs_real_1'], df_weighted['NN weighted avg - this work']).round(2)
+    mape_nn         = mape(df_real['Hs_real_1'], df['NN mean - this work']).round(2)
+    mapes           = mape(df_real['Hs_real_1'], df_real['Noaa_cnn-lstm']).round(2)
+    
+    plt.plot(df.index, df_real['Hs_real_1'], '-*', label=f'Buoy - real observed value',color='black')
+    
+    label_name = f'Ensemble numerical model (NOAA): MAPE: {mapes}'
+    plt.plot(df.index, df_real['Noaa_cnn-lstm'] , '--', label=label_name, color='blue')
+    
+    label_name = f'NN mean - this work: MAPE: {mape_nn}'
+    plt.plot(df.index, df['NN mean - this work'] , '-', label=label_name)
+
+    label_name = f'NN weighted avg - this work: MAPE: {mape_wei}'    
+    plt.plot(df.index, df_weighted['NN weighted avg - this work'] , '-', label=label_name, color='red')
+
+    plt.legend()
+    plt.xticks(x[0],y[0], rotation=15)
+    plt.savefig(save_path+'figure_weighted_avg.png')
+
 def get_metrics(data):
     dict_metrics     = {}
-    
+    new_name         = {'cnn-lstm' : 'CNN-LSTM', 'rnn' : 'RNN', 'cnn' : 'CNN', 'dense' : 'MLP', 'lstm' : 'LSTM'}
+
     for f in data:
         with open(f, 'rb') as handle:
             metrics  = pickle.load(handle)
             model    = f.split('/')[-1].split('_')[-1][:-4] 
             val_mape = metrics['mean_squared_error'][-1]
-            dict_metrics[model] = val_mape
+            dict_metrics[new_name[model]] = val_mape
 
     return pd.DataFrame(dict_metrics, index = ['MSE']).T
 
@@ -509,7 +544,6 @@ def create_graph(dest):
     fold_name_report = dest.split('/')[-2]
     save_path        = f'./reports/{fold_name_report}/'
     save_path        = feat.format_path(save_path)
-    df_result        = create_multi_graph(output,save_path)
+    df_result, real  = create_multi_graph(output,save_path)
     historical_error(output,save_path, df_result)
-
-    breakpoint()
+    create_plot_weighted(df_result, df_metrics, real, save_path)
