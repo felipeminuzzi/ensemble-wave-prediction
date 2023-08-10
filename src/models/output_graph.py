@@ -506,10 +506,10 @@ def get_metrics(data):
         with open(f, 'rb') as handle:
             metrics  = pickle.load(handle)
             model    = f.split('/')[-1].split('_')[-1][:-4] 
-            val_mape = metrics['mean_squared_error'][-1]
+            val_mape = metrics['val_mean_absolute_percentage_error'][-1]
             dict_metrics[new_name[model]] = val_mape
 
-    return pd.DataFrame(dict_metrics, index = ['MSE']).T
+    return pd.DataFrame(dict_metrics, index = ['val_MAPE']).T
 
 def organize_old_result(files):
     dfs         = {}

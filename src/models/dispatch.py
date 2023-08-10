@@ -57,7 +57,7 @@ def train_future_models(mod, features, target, dates, forecast, npredict, dest, 
     epochs          = config.epochs
     cols            = conf.target
 
-    md              = TFlow(mod, features, target, dates, forecast, npredict, 0, num_features, epochs, 0, False, None)
+    md              = TFlow(mod, features, target, dates, forecast, npredict, 0, num_features, epochs, 0.2, False, None)
     result, metric  = md.create_multi_output()
     result.set_index('Data', inplace=True)
 

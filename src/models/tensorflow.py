@@ -109,7 +109,7 @@ class TFlow():
         model                                                 = self.get_model(self.npredict, 1)
         history                                               = self.compile_and_fit(model, x_train, y_train)
         val_metric                                            = history.history
-        
+         
         x_test, y_test                                        = data_format.split_sequence(test_input, test_target, 1, self.lead, self.flag)
         x_in                                                  = x_test[0].reshape(1, len(x_test[0]), self.num_features)
 
