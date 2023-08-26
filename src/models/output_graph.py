@@ -6,7 +6,7 @@ import pickle
 from src.features import features as feat 
 
 plt.rcParams['axes.grid'] = True
-plt.rcParams["figure.figsize"] = (10,6)
+plt.rcParams["figure.figsize"] = (10,3)
 
 def mape(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
@@ -398,7 +398,7 @@ def create_plots_multi(lead, df_true, df_predict,x,y, flag, antigo, tgt):
                 mapes = mape(df_true[tgt], df_predict[col]).round(2)
             plt.plot(df_predict.index, df_predict[col] , '-', label=f'{col} - {mapes}')
     plt.legend()
-    plt.xticks(x,y, rotation=15)
+    plt.xticks(x,y)
 
 def create_error_multi(df_true, df_predict,x,y, tgt):
     ls      = df_predict.columns.to_list()
