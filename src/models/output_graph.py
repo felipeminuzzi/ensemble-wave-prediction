@@ -24,6 +24,10 @@ def mean_erro(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred)))
 
+def root_mean_square(y_true, y_pred):
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.sqrt(np.mean((y_true - y_pred)**2))
+
 def create_output_graph_fut(files,plot_error):
     dfs_6       = []
 
@@ -236,27 +240,27 @@ def create_multi_graph(files,save_path):
     lead = '0'
 
     plt.figure(1)
-    create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], True, False, 'Hs_real_1')
+    create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], True, False, 'Hs_real_1', True)
     plt.figure(1).text(0.06, 0.5, 'Wave height - $H_s$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_1.png')
 
     plt.figure(2)
-    create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], False, False, 'Hs_real_1')
+    create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], False, False, 'Hs_real_1', True)
     plt.figure(2).text(0.06, 0.5, 'Wave height - $H_s$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_2.png')
 
     plt.figure(3)
-    create_plots_multi(lead,reais[0],erros[0],xx[0],yy[0], True, False, 'erro_real_1')
+    create_plots_multi(lead,reais[0],erros[0],xx[0],yy[0], True, False, 'erro_real_1', True)
     plt.figure(3).text(0.06, 0.5, 'Absolute error - $\Delta_{abs}$', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_3.png')
 
     plt.figure(4)
-    create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], True, True, 'Noaa_cnn-lstm')
+    create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], True, True, 'Noaa_cnn-lstm',True)
     plt.figure(4).text(0.06, 0.5, 'Wave height - $H_s$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_4.png')
 
     plt.figure(5)
-    create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], False, True, 'Noaa_cnn-lstm')
+    create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], False, True, 'Noaa_cnn-lstm', True)
     plt.figure(5).text(0.06, 0.5, 'Wave height - $H_s$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_5.png')
 
@@ -316,7 +320,7 @@ def historical_error(output,save_path,df):
     df['noaa_mean_error_abs'] = df_target.mean(axis=0).values
     df['noaa_mean_error_rel'] = df_rel.mean(axis=0).values
     df['Lead'] = lead_lists
-
+    
     plt.figure()
     plt.plot(df['Lead'], df['noaa_mean_error_rel']*100 , '--', label='NOAA historical relative error', color='black')
     plt.plot(df['Lead'], df['error_rel']*100 , label='NN mean - this work relative error')
@@ -359,7 +363,7 @@ def create_plots(lead, df_true, df_predict,x,y, flag, antigo):
     plt.legend()
     plt.xticks(x,y, rotation=30)
 
-def create_plots_multi(lead, df_true, df_predict,x,y, flag, antigo, tgt):
+def create_plots_multi(lead, df_true, df_predict,x,y, flag, antigo, tgt, flag_legend):
     new_name = {'Hs_cnn-lstm' : 'CNN-LSTM', 'Hs_rnn' : 'RNN', 'Hs_cnn' : 'CNN', 'Hs_dense' : 'MLP', 'Hs_lstm' : 'LSTM',
                 'erro_cnn-lstm' : 'Error CNN-LSTM', 'erro_rnn' : 'Error RNN', 'erro_dense' : 'Error MLP', 'erro_cnn' : 'Error CNN', 
                 'erro_lstm' : 'Error LSTM'}
@@ -372,13 +376,20 @@ def create_plots_multi(lead, df_true, df_predict,x,y, flag, antigo, tgt):
     if antigo:
         plt.plot(df_true.index, df_true['Hs_real_1'], '-*', label=f'Buoy - real observed value',color='black')
         mapes = mape(df_true['Hs_real_1'], df_true['Noaa_cnn-lstm']).round(2)
+        mae  = mean_erro(df_true['Hs_real_1'], df_true['Noaa_cnn-lstm']).round(2)
+        rmse = root_mean_square(df_true['Hs_real_1'], df_true['Noaa_cnn-lstm']).round(2)
+        print('Error related do NOAA: ')
+        print(f'MAPE: {mapes}')
+        print(f'MAE: {mae}')
+        print(f'RMSE: {rmse}')
+        print('*'*50)
     else:
         mapes = 0
     if lab == 'Ensemble numerical model - NOAA':
         label_name = f'{lab} - {mapes}'
     else:
         label_name = f'{lab}'
-    
+
     plt.plot(df_true.index, df_true[tgt] , '--', label=label_name, color='blue')
     if flag:
         for col in ls[:-1]:
@@ -397,7 +408,15 @@ def create_plots_multi(lead, df_true, df_predict,x,y, flag, antigo, tgt):
             else:
                 mapes = mape(df_true[tgt], df_predict[col]).round(2)
             plt.plot(df_predict.index, df_predict[col] , '-', label=f'{col} - {mapes}')
-    plt.legend()
+            mae  = mean_erro(df_true['Hs_real_1'], df_predict[col]).round(2)
+            rmse = root_mean_square(df_true['Hs_real_1'], df_predict[col]).round(2)
+            print('Error related do NN: ')
+            print(f'MAPE: {mapes}')
+            print(f'MAE: {mae}')
+            print(f'RMSE: {rmse}')
+
+    if flag_legend:
+        plt.legend()
     plt.xticks(x,y)
 
 def create_error_multi(df_true, df_predict,x,y, tgt):
