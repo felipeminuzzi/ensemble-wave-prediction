@@ -57,7 +57,7 @@ def create_output_graph_fut(files,plot_error):
     plt.figure(1)
     create_plots(lead,reais[0],predictions[0],xx[0],yy[0], True, None)
     plt.figure(1).text(0.5, 0.04, 'Time', ha='center', va='center')
-    plt.figure(1).text(0.06, 0.5, 'Wave height - Hs (m)', ha='center', va='center', rotation='vertical')
+    plt.figure(1).text(0.06, 0.5, 'H_s (m)', ha='center', va='center', rotation='vertical')
 
     ls      = predictions[0].columns.to_list()
     lead    = int(ls[0].split('_')[-1]) 
@@ -65,7 +65,7 @@ def create_output_graph_fut(files,plot_error):
     plt.figure(2)
     create_plots(lead,reais[0],predictions[0],xx[0],yy[0], False, None)
     plt.figure(2).text(0.5, 0.04, 'Time', ha='center', va='center')
-    plt.figure(2).text(0.06, 0.5, 'Wave height - Hs (m)', ha='center', va='center', rotation='vertical')
+    plt.figure(2).text(0.06, 0.5, 'H_s (m)', ha='center', va='center', rotation='vertical')
 
     if plot_error:
         ls      = predictions[0].columns.to_list()
@@ -143,7 +143,7 @@ def create_output_graph(files,ls_antigos,dict_metrics, average, plot_error):
         #plt.subplot(2,2,i+1)
         create_plots(lead,reais[i],predictions[i],xx[i],yy[i], True, None)
         plt.figure(i+1).text(0.5, 0.04, 'Time', ha='center', va='center')
-        plt.figure(i+1).text(0.06, 0.5, 'Wave height - Hs (m)', ha='center', va='center', rotation='vertical')
+        plt.figure(i+1).text(0.06, 0.5, 'H_s (m)', ha='center', va='center', rotation='vertical')
     for i in range(4):
         ls      = predictions[i].columns.to_list()
         lead    = int(ls[0].split('_')[-1]) 
@@ -155,7 +155,7 @@ def create_output_graph(files,ls_antigos,dict_metrics, average, plot_error):
         plt.subplot(2,2,i+1)
         create_plots(lead,reais[i],predictions[i],xx[i],yy[i], False, antigo)
         plt.figure(5).text(0.5, 0.04, 'Time', ha='center', va='center')
-        plt.figure(5).text(0.06, 0.5, 'Wave height - Hs (m)', ha='center', va='center', rotation='vertical')
+        plt.figure(5).text(0.06, 0.5, 'H_s (m)', ha='center', va='center', rotation='vertical')
     # # creating the weights
     if average: 
         for i in range(4):
@@ -169,7 +169,7 @@ def create_output_graph(files,ls_antigos,dict_metrics, average, plot_error):
             plt.subplot(2,2,i+1)
             create_plots_avg(lead,reais[i],predictions[i],xx[i],yy[i], df_metric, antigo)
             plt.figure(6).text(0.5, 0.04, 'Time', ha='center', va='center')
-            plt.figure(6).text(0.06, 0.5, 'Wave height - Hs (m)', ha='center', va='center', rotation='vertical')
+            plt.figure(6).text(0.06, 0.5, 'H_s (m)', ha='center', va='center', rotation='vertical')
 
     if plot_error:
         plt.figure(6)
@@ -241,12 +241,12 @@ def create_multi_graph(files,save_path):
 
     plt.figure(1)
     create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], True, False, 'Hs_real_1', True)
-    plt.figure(1).text(0.06, 0.5, 'Wave height - $H_s$ (m)', ha='center', va='center', rotation='vertical')
+    plt.figure(1).text(0.06, 0.5, '$H_s$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_1.png')
 
     plt.figure(2)
     create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], False, False, 'Hs_real_1', True)
-    plt.figure(2).text(0.06, 0.5, 'Wave height - $H_s$ (m)', ha='center', va='center', rotation='vertical')
+    plt.figure(2).text(0.06, 0.5, '$H_s$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_2.png')
 
     plt.figure(3)
@@ -256,12 +256,12 @@ def create_multi_graph(files,save_path):
 
     plt.figure(4)
     create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], True, True, 'Noaa_cnn-lstm',True)
-    plt.figure(4).text(0.06, 0.5, 'Wave height - $H_s$ (m)', ha='center', va='center', rotation='vertical')
+    plt.figure(4).text(0.06, 0.5, '$H_s$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_4.png')
 
     plt.figure(5)
     create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], False, True, 'Noaa_cnn-lstm', True)
-    plt.figure(5).text(0.06, 0.5, 'Wave height - $H_s$ (m)', ha='center', va='center', rotation='vertical')
+    plt.figure(5).text(0.06, 0.5, '$H_s$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_5.png')
 
     plt.figure(6)
