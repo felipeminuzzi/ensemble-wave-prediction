@@ -238,6 +238,10 @@ def create_multi_graph(files,save_path):
 
     ls      = predictions[0].columns.to_list()
     lead = '0'
+    print('*'*50)
+    print('Statistics for data:')
+    print(reais[0][['Hs_real_1','Noaa_cnn-lstm']].describe())
+    print('*'*50)
 
     plt.figure(1)
     create_plots_multi(lead,reais[0],predictions[0],xx[0],yy[0], True, False, 'Hs_real_1', True)
@@ -273,6 +277,11 @@ def create_multi_graph(files,save_path):
     create_error_abs(reais[0],predictions[0],xx[0],yy[0], 'Noaa_cnn-lstm')
     plt.figure(7).text(0.06, 0.5, 'Absolute error - $\Delta_{abs}$ (m)', ha='center', va='center', rotation='vertical')
     plt.savefig(save_path+'figure_7.png')
+
+    plt.figure(8)
+    create_scatter(reais[0],predictions[0])
+    plt.savefig(save_path+'scatter_plots.png')
+
 
     if df.shape[1] == 8:
         create_era5_plots(era_6_preds, era_6, test_6, real_6, xx[0], yy[0],save_path)
@@ -516,6 +525,20 @@ def create_plot_weighted(df, df_met, df_real, save_path):
     plt.legend()
     plt.xticks(x[0],y[0], rotation=15)
     plt.savefig(save_path+'figure_weighted_avg.png')
+
+def create_scatter(df_true, df_predict):
+
+    plt.figure(figsize=(7,7))
+
+    parameters = np.polyfit(df_true['Hs_real_1'], df_predict['NN mean - this work'], 1)
+    polyline = np.poly1d(parameters)
+
+    plt.scatter(df_true['Hs_real_1'],df_true['Noaa_cnn-lstm'], label = 'Ensemble numerical model - NOAA', color='green')
+    plt.scatter(df_true['Hs_real_1'], df_predict['NN mean - this work'], label = 'NN mean - this work', color = 'red')
+    plt.plot(df_true['Hs_real_1'], polyline(df_true['Hs_real_1']),color="black", linewidth=2, linestyle="-"),
+    plt.legend()
+    plt.xlabel('$H_s$ - real buoy data')
+    plt.ylabel('$H_s$ - predicted')
 
 def get_metrics(data):
     dict_metrics     = {}
