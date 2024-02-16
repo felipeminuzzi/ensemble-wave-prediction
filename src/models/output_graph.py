@@ -537,8 +537,8 @@ def create_scatter(df_true, df_predict):
     plt.scatter(df_true['Hs_real_1'], df_predict['NN mean - this work'], label = 'NN mean - this work', color = 'red')
     plt.plot(df_true['Hs_real_1'], polyline(df_true['Hs_real_1']),color="black", linewidth=2, linestyle="-"),
     plt.legend()
-    plt.xlabel('$H_s$ - real buoy data')
-    plt.ylabel('$H_s$ - predicted')
+    plt.xlabel('$H_s$ (meters) - real buoy data')
+    plt.ylabel('$H_s$ (meters) - predicted')
 
 def get_metrics(data):
     dict_metrics     = {}
