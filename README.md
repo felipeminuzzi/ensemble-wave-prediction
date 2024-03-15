@@ -1,5 +1,7 @@
-# Ensemble Ocean Waves Prediction
+# EnsWAPredNN - Ensemble ocean waves predictions with neural networks
 A package to use deep learning to predict oceanography variables from historical data.
+
+The published paper can be found [here](https://doi.org/10.1016/j.oceaneng.2024.117479)
 
 ## Technical explanation of the code
 
