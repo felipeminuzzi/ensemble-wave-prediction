@@ -65,7 +65,11 @@ The figures will be saved inside a folder with the same name as the result in th
 
 ## Meta
 
-This lib is used in the paper: TBD. Please cite this when using it.
+This lib is used in the paper: 
+
+[https://doi.org/10.1016/j.oceaneng.2024.117479](https://doi.org/10.1016/j.oceaneng.2024.117479)
+
+Please cite this when using it.
 
 This project is licensed under the terms of the GNU General Public License. See ``LICENSE`` for more information.
 
